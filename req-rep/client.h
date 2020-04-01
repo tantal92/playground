@@ -17,12 +17,12 @@ textMessage::textMessage createMessage(const std::string &text, const int id)
     return msg;
 }
 
-void client(const std::string &portToConnect)
+void client(const std::string &clientId, const std::string &portToConnect)
 {
     //  Prepare our context and socket
     zmq::context_t context(1);
     zmq::socket_t  socket(context, ZMQ_REQ);
-    std::cout << "Connecting to  " << portToConnect << std::endl;
+//    std::cout << "Connecting to  " << portToConnect << std::endl;
     socket.connect(portToConnect.c_str());
 
     //  Do 10 requests, waiting each time for a response
@@ -35,7 +35,7 @@ void client(const std::string &portToConnect)
 
         zmq::message_t request(msgSize);
         memcpy(request.data(), str.c_str(), msgSize);
-        std::cout << "Sending: " << msg.msg() << ", " << msg.id() << std::endl;
+        std::cout << "(clientId: "<< clientId << ")" << ", sending: " << msg.msg() << ", " << msg.id() << std::endl;
         socket.send(request);
 
         //  Get the reply.
@@ -43,6 +43,6 @@ void client(const std::string &portToConnect)
         socket.recv(&reply);
         textMessage::serverResponse res{};
         res.ParseFromArray(reply.data(), reply.size());
-        std::cout << "Received: " << res.msg() << std::endl;
+        std::cout << "(clientId: "<< clientId << ")"<< ", received: " << res.msg() << std::endl;
     }
 }

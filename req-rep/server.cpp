@@ -1,6 +1,5 @@
 #include "client.h"
 #include "textMessage.pb.h"
-#include <chrono>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -17,8 +16,6 @@ std::string getSocketPort(const zmq::socket_t &sock)
 
 int main()
 {
-    char   port[1024];
-    size_t port_size = sizeof(port);
     //  Prepare our context and socket
     zmq::context_t context(1);
     zmq::socket_t  socket(context, ZMQ_REP);
@@ -32,7 +29,8 @@ int main()
 
     std::string portInUse = getSocketPort(socket);
     std::cout << "Starting server on port: " << portInUse << std::endl;
-    std::thread(client, portInUse).detach();
+    std::thread(client, "1", portInUse).detach();
+    //std::thread(client, "2", portInUse).detach();
 
     while (true) {
         zmq::message_t request;
