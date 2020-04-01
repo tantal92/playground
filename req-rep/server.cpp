@@ -1,18 +1,11 @@
 #include "client.h"
 #include "textMessage.pb.h"
+#include "zmqHelpers.h"
 #include <iostream>
 #include <string>
 #include <thread>
 #include <unistd.h>
 #include <zmq.hpp>
-
-std::string getSocketPort(const zmq::socket_t &sock)
-{
-    char   port[1024];
-    size_t port_size = sizeof(port);
-    sock.getsockopt(ZMQ_LAST_ENDPOINT, &port, &port_size);
-    return std::string{port};
-}
 
 int main()
 {
@@ -27,10 +20,10 @@ int main()
         std::terminate();
     }
 
-    std::string portInUse = getSocketPort(socket);
+    std::string portInUse = zhelpers::getSocketPort(socket);
     std::cout << "Starting server on port: " << portInUse << std::endl;
     std::thread(client, "1", portInUse).detach();
-    //std::thread(client, "2", portInUse).detach();
+    // std::thread(client, "2", portInUse).detach();
 
     while (true) {
         zmq::message_t request;

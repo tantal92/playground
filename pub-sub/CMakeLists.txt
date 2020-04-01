@@ -9,10 +9,10 @@ find_package(Threads REQUIRED)
 
 
 # client bin
-add_executable(server)
-target_include_directories(server PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
-target_sources(server PRIVATE server.cpp textMessage.pb.cc)
-target_link_libraries(server
+add_executable(wuserver)
+target_include_directories(wuserver PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
+target_sources(wuserver PRIVATE wuserver.cpp)
+target_link_libraries(wuserver
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ
         Threads::Threads
