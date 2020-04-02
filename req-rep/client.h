@@ -5,6 +5,7 @@
 //
 #pragma once
 #include "textMessage.pb.h"
+#include "zmqHelpers.h"
 #include <iostream>
 #include <string>
 #include <zmq.hpp>
@@ -22,27 +23,20 @@ void client(const std::string &clientId, const std::string &portToConnect)
     //  Prepare our context and socket
     zmq::context_t context(1);
     zmq::socket_t  socket(context, ZMQ_REQ);
-//    std::cout << "Connecting to  " << portToConnect << std::endl;
     socket.connect(portToConnect.c_str());
 
     //  Do 10 requests, waiting each time for a response
     for (int request_nbr = 0; request_nbr != 10; request_nbr++) {
         textMessage::textMessage msg = createMessage("proto", request_nbr);
-        auto                     msgSize = msg.ByteSizeLong();
 
-        std::string str;
-        msg.SerializeToString(&str);
+        std::cout << "(cId: " << clientId << ")"
+                  << ", sending: " << msg.msg() << ", " << msg.id() << std::endl;
 
-        zmq::message_t request(msgSize);
-        memcpy(request.data(), str.c_str(), msgSize);
-        std::cout << "(clientId: "<< clientId << ")" << ", sending: " << msg.msg() << ", " << msg.id() << std::endl;
-        socket.send(request);
+        zhelpers::sendProto(socket, msg);
 
         //  Get the reply.
-        zmq::message_t reply;
-        socket.recv(&reply);
-        textMessage::serverResponse res{};
-        res.ParseFromArray(reply.data(), reply.size());
-        std::cout << "(clientId: "<< clientId << ")"<< ", received: " << res.msg() << std::endl;
+        auto reply = zhelpers::receiveProto<textMessage::serverResponse>(socket);
+        std::cout << "(cId: " << clientId << ")"
+                  << ", received: " << reply.msg() << std::endl;
     }
 }

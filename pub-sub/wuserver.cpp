@@ -33,7 +33,7 @@ int main()
         std::terminate();
     }
 
-    std::string portInUse = zhelpers::getSocketPort(socket);
+    std::string portInUse = zhelpers::getSocketPort(publisher);
     std::cout << "Starting server on port: " << portInUse << std::endl;
     std::thread(wuclient, "1", portInUse).detach();
 
