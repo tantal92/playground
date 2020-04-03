@@ -5,13 +5,14 @@
 //
 //  Olivier Chamoux <olivier.chamoux@fr.thalesgroup.com>
 //
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <zmq.hpp>
-#include <thread>
+#include "weather.pb.h"
 #include "wuclient.h"
 #include "zmqHelpers.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <thread>
+#include <time.h>
+#include <zmq.hpp>
 
 #if (defined(WIN32))
 #include <zhelpers.hpp>
@@ -21,18 +22,10 @@
 
 int main()
 {
-
     //  Prepare our context and publisher
     zmq::context_t context(1);
     zmq::socket_t  publisher(context, ZMQ_PUB);
-
-    try {
-        publisher.bind("tcp://*:*");
-    } catch (zmq::error_t &e) {
-        std::cerr << "couldn't bind to socket (client): " << e.what();
-        std::terminate();
-    }
-
+    zhelpers::bindToRandomPort(publisher);
     std::string portInUse = zhelpers::getSocketPort(publisher);
     std::cout << "Starting server on port: " << portInUse << std::endl;
     std::thread(wuclient, "1", portInUse).detach();
@@ -42,18 +35,16 @@ int main()
     //  Initialize random number generator
     srandom((unsigned)time(NULL));
     while (1) {
-
-        int zipcode, temperature, relhumidity;
+        weather::weather wthr{};
 
         //  Get values that will fool the boss
-        zipcode = within(100000);
-        temperature = within(215) - 80;
-        relhumidity = within(50) + 10;
+        wthr.set_zipcode(within(100000));
+        wthr.set_temperature(within(215) - 80);
+        wthr.set_relhumidity(within(50) + 10);
+
 
         //  Send message to all subscribers
-        zmq::message_t message(20);
-        snprintf((char *)message.data(), 20, "%05d %d %d", zipcode, temperature, relhumidity);
-        publisher.send(message);
+        zhelpers::sendProto(publisher, wthr);
     }
     return 0;
 }

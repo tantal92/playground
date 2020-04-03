@@ -42,7 +42,6 @@ void sendProto(zmq::socket_t &socket, const T &proto)
     zmq::message_t msg(protoSize);
     std::string    str;
     proto.SerializeToString(&str);
-
     memcpy(msg.data(), str.c_str(), protoSize);
     socket.send(msg);
 }
