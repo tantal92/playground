@@ -9,6 +9,7 @@
 #pragma once
 #include "weather.pb.h"
 #include "zmqHelpers.h"
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <zmq.hpp>
@@ -24,22 +25,32 @@ void wuclient(const std::string &clientId, const std::string &portToConnect)
 
     //  Subscribe to zipcode, default is NYC, 10001
     const char *filter = "10001 ";
-    subscriber.setsockopt(ZMQ_SUBSCRIBE, NULL, 0);
+    subscriber.setsockopt(ZMQ_SUBSCRIBE, filter, strlen(filter));
 
     //  Process 100 updates
-    int  update_nbr;
-    long total_temp = 0;
-    for (update_nbr = 0; update_nbr < 100;) {
+    int                                   update_nbr;
+    long                                  total_temp = 0;
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    for (update_nbr = 0; update_nbr < 100; update_nbr++) {
 
-        auto update = zhelpers::receiveProto<weather::weather>(subscriber);
-        if (update.zipcode() == 10001) {
-            std::string    str;
-            update.SerializeToString(&str);
-            std::cout << str << "\n";
-            total_temp += update.temperature();
-            update_nbr++;
-        }
+        zmq::message_t update;
+        subscriber.recv(&update);
+        weather::weather receivedMsg{};
+        std::string      zipcode, proto;
+
+        std::istringstream iss(static_cast<char *>(update.data()));
+        iss >> zipcode >> proto;
+
+        receivedMsg.ParseFromString(proto);
+        total_temp += receivedMsg.temperature();
     }
     std::cout << "Average temperature for zipcode '" << filter << "' was "
               << (int)(total_temp / update_nbr) << "F" << std::endl;
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Time difference = "
+              << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]"
+              << std::endl;
+    std::cout << "Time difference = "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+              << "[ms]" << std::endl;
 }

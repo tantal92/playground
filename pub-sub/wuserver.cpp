@@ -44,7 +44,13 @@ int main()
 
 
         //  Send message to all subscribers
-        zhelpers::sendProto(publisher, wthr);
+        std::string    str;
+        wthr.SerializeToString(&str);
+        str.insert(0, std::to_string(wthr.zipcode())+ " ");
+        int msgSize = str.length();
+        zmq::message_t msg(msgSize);
+        memcpy(msg.data(), str.c_str(), msgSize);
+        publisher.send(msg);
     }
     return 0;
 }
