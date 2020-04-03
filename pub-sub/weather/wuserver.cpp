@@ -28,9 +28,8 @@ int main()
     zhelpers::bindToRandomPort(publisher);
     std::string portInUse = zhelpers::getSocketPort(publisher);
     std::cout << "Starting server on port: " << portInUse << std::endl;
+    // run client
     std::thread(wuclient, "1", portInUse).detach();
-
-    //    publisher.bind("ipc://weather.ipc");				// Not usable on Windows.
 
     //  Initialize random number generator
     srandom((unsigned)time(NULL));
@@ -42,9 +41,16 @@ int main()
         wthr.set_temperature(within(215) - 80);
         wthr.set_relhumidity(within(50) + 10);
 
-
         //  Send message to all subscribers
-        zhelpers::sendProto(publisher, wthr);
+        // https://stackoverflow.com/questions/55230343/how-to-filter-in-pub-sub-with-protobuf-binaries
+        std::string str;
+        wthr.SerializeToString(&str);
+        // prepend subject for filter
+        str.insert(0, std::to_string(wthr.zipcode()) + " ");
+        int            msgSize = str.length();
+        zmq::message_t msg(msgSize);
+        memcpy(msg.data(), str.c_str(), msgSize);
+        publisher.send(msg);
     }
     return 0;
 }

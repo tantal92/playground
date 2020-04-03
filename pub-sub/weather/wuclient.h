@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include "timer.h"
 #include "weather.pb.h"
 #include "zmqHelpers.h"
 #include <iostream>
@@ -24,22 +25,26 @@ void wuclient(const std::string &clientId, const std::string &portToConnect)
 
     //  Subscribe to zipcode, default is NYC, 10001
     const char *filter = "10001 ";
-    subscriber.setsockopt(ZMQ_SUBSCRIBE, NULL, 0);
+    subscriber.setsockopt(ZMQ_SUBSCRIBE, filter, strlen(filter));
 
+    duration::Timer t{true};
     //  Process 100 updates
     int  update_nbr;
     long total_temp = 0;
-    for (update_nbr = 0; update_nbr < 100;) {
+    for (update_nbr = 0; update_nbr < 100; update_nbr++) {
 
-        auto update = zhelpers::receiveProto<weather::weather>(subscriber);
-        if (update.zipcode() == 10001) {
-            std::string    str;
-            update.SerializeToString(&str);
-            std::cout << str << "\n";
-            total_temp += update.temperature();
-            update_nbr++;
-        }
+        zmq::message_t update;
+        subscriber.recv(&update);
+        weather::weather receivedMsg{};
+        std::string      zipcode, proto;
+
+        std::istringstream iss(static_cast<char *>(update.data()));
+        iss >> zipcode >> proto;
+
+        receivedMsg.ParseFromString(proto);
+        total_temp += receivedMsg.temperature();
     }
     std::cout << "Average temperature for zipcode '" << filter << "' was "
               << (int)(total_temp / update_nbr) << "F" << std::endl;
+    t.stop_and_print();
 }
