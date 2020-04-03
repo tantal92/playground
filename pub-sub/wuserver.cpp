@@ -42,12 +42,13 @@ int main()
         wthr.set_temperature(within(215) - 80);
         wthr.set_relhumidity(within(50) + 10);
 
-
         //  Send message to all subscribers
-        std::string    str;
+        // https://stackoverflow.com/questions/55230343/how-to-filter-in-pub-sub-with-protobuf-binaries
+        std::string str;
         wthr.SerializeToString(&str);
-        str.insert(0, std::to_string(wthr.zipcode())+ " ");
-        int msgSize = str.length();
+        // prepend subject for filter:
+        str.insert(0, std::to_string(wthr.zipcode()) + " ");
+        int            msgSize = str.length();
         zmq::message_t msg(msgSize);
         memcpy(msg.data(), str.c_str(), msgSize);
         publisher.send(msg);
