@@ -8,11 +8,11 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
 
-# client bin
-add_executable(wuserver)
-target_include_directories(wuserver PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
-target_sources(wuserver PRIVATE wuserver.cpp weather.pb.cc)
-target_link_libraries(wuserver
+# divide-and-conquer bin
+add_executable(divide-and-conquer)
+target_include_directories(divide-and-conquer PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/utils)
+target_sources(divide-and-conquer PRIVATE taskvent.cpp)
+target_link_libraries(divide-and-conquer
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ
         Threads::Threads
