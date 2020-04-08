@@ -8,10 +8,10 @@ find_package(Threads REQUIRED)
 
 
 # protoSerialize bin
-add_executable(protoSerialize)
-target_include_directories(protoSerialize PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
-target_sources(protoSerialize PRIVATE protoSerialize.cpp ../req-rep/textMessage.pb.cc)
-target_link_libraries(protoSerialize
+add_executable(test)
+target_include_directories(test PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
+target_sources(test PRIVATE test.cpp)
+target_link_libraries(test
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ
         Threads::Threads

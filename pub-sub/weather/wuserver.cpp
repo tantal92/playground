@@ -25,8 +25,8 @@ int main()
     //  Prepare our context and publisher
     zmq::context_t context(1);
     zmq::socket_t  publisher(context, ZMQ_PUB);
-    zhelpers::bindToRandomPort(publisher);
-    std::string portInUse = zhelpers::getSocketPort(publisher);
+    zhelpers::bind_to_random_port(publisher);
+    std::string portInUse = zhelpers::get_socket_port(publisher);
     std::cout << "Starting server on port: " << portInUse << std::endl;
     // run client
     std::thread(wuclient, "1", portInUse).detach();

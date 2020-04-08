@@ -10,8 +10,8 @@ find_package(Threads REQUIRED)
 
 # divide-and-conquer bin
 add_executable(divide-and-conquer)
-target_include_directories(divide-and-conquer PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/utils)
-target_sources(divide-and-conquer PRIVATE taskvent.cpp)
+target_include_directories(divide-and-conquer PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
+target_sources(divide-and-conquer PRIVATE TaskDistributor.cpp main.cpp readyIndicator.pb.cc ${CMAKE_SOURCE_DIR}/utils/zmqHelpers.cpp)
 target_link_libraries(divide-and-conquer
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ

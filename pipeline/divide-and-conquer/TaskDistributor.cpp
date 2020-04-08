@@ -1,43 +1,40 @@
 //
-//  Task ventilator in C++
-//  Binds PUSH socket to tcp://localhost:5557
-//  Sends batch of tasks to workers via that socket
+// Created by sebastian on 07/04/2020.
 //
-//  Olivier Chamoux <olivier.chamoux@fr.thalesgroup.com>
-//
+
+#include "TaskDistributor.h"
 #include "tasksink.h"
 #include "taskwork.h"
+#include "utils/zmqHelpers.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <thread>
 #include <unistd.h>
+#include <utils/zhelpers.hpp>
 #include <zmq.hpp>
 
-#define within(num) (int)((float)num * random() / (RAND_MAX + 1.0))
-
-void run_workers(int number_of_workers);
-
-int main(int argc, char *argv[])
+TaskDistributor::TaskDistributor(zmq::context_t &context, std::string &workerAddr)
+    : m_Socket{context, ZMQ_PUSH}, m_Sink{context, ZMQ_PUSH}, m_WorkerAddr{workerAddr}
 {
-    zmq::context_t context(1);
+}
 
-    //  Socket to send messages on
-    zmq::socket_t sender(context, ZMQ_PUSH);
-    sender.bind("tcp://*:5557");
-    run_workers(3);
-    std::thread t_sink{tasksink};
+void TaskDistributor::run()
+{
+    bindSocket();
     // wait for workers and tasksink... refactor to receive msg ready from them
+    runWorkers(3);
+    std::thread t_sink{tasksink};
     sleep(2);
 
     std::cout << "Sending tasks to workers...\n" << std::endl;
 
     //  The first message is "0" and signals start of batch
-    zmq::socket_t sink(context, ZMQ_PUSH);
-    sink.connect("tcp://localhost:5558");
+
+    m_Sink.connect("tcp://localhost:5558");
     zmq::message_t message(2);
     memcpy(message.data(), "0", 1);
-    sink.send(message);
+    m_Sink.send(message);
 
     //  Initialize random number generator
     srandom((unsigned)time(NULL));
@@ -53,17 +50,23 @@ int main(int argc, char *argv[])
         message.rebuild(10);
         memset(message.data(), '\0', 10);
         sprintf((char *)message.data(), "%d", workload);
-        sender.send(message);
+        m_Socket.send(message);
     }
     std::cout << "Total expected cost: " << total_msec << " msec" << std::endl;
     t_sink.join();
     sleep(1); //  Give 0MQ time to deliver
-
-    return 0;
+}
+void TaskDistributor::bindSocket()
+{
+    // bind socket
+    //  Socket to send messages on
+    zhelpers::bind_to_random_port(m_Socket);
+    m_Port = zhelpers::get_socket_port(m_Socket); // 57
 }
 
-void run_workers(int number_of_workers)
+void TaskDistributor::runWorkers(int number_of_workers)
 {
     for (int i = 0; i < number_of_workers; i++)
-        std::thread(worker, std::to_string(i + 1)).detach();
+        std::thread(worker, std::to_string(i + 1), m_Port, m_WorkerAddr).detach();
 }
+const std::string &TaskDistributor::getPort() const { return m_Port; }

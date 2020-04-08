@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package readyIndicator;
+
+message readyIndicator {
+   string serialized_thread_id = 1;
+}
