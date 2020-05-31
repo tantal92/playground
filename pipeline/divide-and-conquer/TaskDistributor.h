@@ -12,9 +12,7 @@
 class TaskDistributor
 {
   public:
-    TaskDistributor(zmq::context_t &context, std::string &workerAddr);
-
-    const std::string &getPort() const;
+    TaskDistributor(zmq::context_t &context);
     void               run();
 
   private:
@@ -22,8 +20,6 @@ class TaskDistributor
     void          runWorkers(int number_of_workers);
     zmq::socket_t m_Socket;
     zmq::socket_t m_Sink;
-    std::string   m_Port;
-    std::string   m_WorkerAddr;
 };
 
 #endif // PROTOTUT_TASKDISTRIBUTOR_H

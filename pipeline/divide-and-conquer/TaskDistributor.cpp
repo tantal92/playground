@@ -14,8 +14,8 @@
 #include <utils/zhelpers.hpp>
 #include <zmq.hpp>
 
-TaskDistributor::TaskDistributor(zmq::context_t &context, std::string &workerAddr)
-    : m_Socket{context, ZMQ_PUSH}, m_Sink{context, ZMQ_PUSH}, m_WorkerAddr{workerAddr}
+TaskDistributor::TaskDistributor(zmq::context_t &context)
+    : m_Socket{context, ZMQ_PUSH}, m_Sink{context, ZMQ_PUSH}
 {
 }
 
@@ -61,12 +61,10 @@ void TaskDistributor::bindSocket()
     // bind socket
     //  Socket to send messages on
     zhelpers::bind_to_random_port(m_Socket);
-    m_Port = zhelpers::get_socket_port(m_Socket); // 57
 }
 
 void TaskDistributor::runWorkers(int number_of_workers)
 {
     for (int i = 0; i < number_of_workers; i++)
-        std::thread(worker, std::to_string(i + 1), m_Port, m_WorkerAddr).detach();
+        std::thread(worker, std::to_string(i + 1), zhelpers::get_socket_port(m_Socket)).detach();
 }
-const std::string &TaskDistributor::getPort() const { return m_Port; }

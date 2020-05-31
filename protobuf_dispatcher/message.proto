@@ -1,0 +1,17 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+package pb;
+
+message MessageBase{
+   uint32 messageId = 1;
+   google.protobuf.Any actualMessage = 2;
+}
+
+message type_one {
+   string msg = 1;
+}
+
+message type_two {
+   string msg = 1;
+}

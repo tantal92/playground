@@ -12,15 +12,15 @@ int main()
     //  Prepare our context and socket
     zmq::context_t context(1);
     zmq::socket_t  socket(context, ZMQ_REP);
-    zhelpers::bindToRandomPort(socket);
-    std::string portInUse = zhelpers::getSocketPort(socket);
+    zhelpers::bind_to_random_port(socket);
+    std::string portInUse = zhelpers::get_socket_port(socket);
 
     std::cout << "Starting server on port: " << portInUse << std::endl;
     std::thread(client, "1", portInUse).detach();
     // std::thread(client, "2", portInUse).detach();
 
     while (true) {
-        auto receivedMsg = zhelpers::receiveProto<textMessage::textMessage>(socket);
+        auto receivedMsg = zhelpers::receive_proto<textMessage::textMessage>(socket);
 
         std::cout << "\t(serv) Received: " << receivedMsg.msg() << ", id: " << receivedMsg.id()
                   << std::endl;
@@ -32,7 +32,7 @@ int main()
         textMessage::serverResponse replyMsg{};
         replyMsg.set_msg("id: " + std::to_string(receivedMsg.id()) + ", msg: " + receivedMsg.msg());
 
-        zhelpers::sendProto(socket, replyMsg);
+        zhelpers::send_proto(socket, replyMsg);
     }
     return 0;
 }

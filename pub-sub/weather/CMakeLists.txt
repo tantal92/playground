@@ -11,7 +11,7 @@ find_package(Threads REQUIRED)
 # server bin
 add_executable(wuserver)
 target_include_directories(wuserver PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/utils)
-target_sources(wuserver PRIVATE wuserver.cpp weather.pb.cc)
+target_sources(wuserver PRIVATE wuserver.cpp weather.pb.cc ${CMAKE_SOURCE_DIR}/utils/zmqHelpers.cpp)
 target_link_libraries(wuserver
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ

@@ -9,8 +9,8 @@ find_package(Threads REQUIRED)
 
 # protoSerialize bin
 add_executable(test)
-target_include_directories(test PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
-target_sources(test PRIVATE test.cpp)
+target_include_directories(test PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/utils)
+target_sources(test PRIVATE test.cpp message.pb.cc ${CMAKE_SOURCE_DIR}/utils/zmqHelpers.cpp)
 target_link_libraries(test
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ

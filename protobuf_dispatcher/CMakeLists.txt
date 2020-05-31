@@ -9,10 +9,10 @@ find_package(Threads REQUIRED)
 
 
 # client bin
-add_executable(server)
-target_include_directories(server PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/utils)
-target_sources(server PRIVATE server.cpp textMessage.pb.cc ${CMAKE_SOURCE_DIR}/utils/zmqHelpers.cpp)
-target_link_libraries(server
+add_executable(dispatcher)
+target_include_directories(dispatcher PRIVATE ${PROTOBUF_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/utils)
+target_sources(dispatcher PRIVATE server.cpp message.pb.cc ${CMAKE_SOURCE_DIR}/utils/zmqHelpers.cpp)
+target_link_libraries(dispatcher
         ${PROTOBUF_LIBRARY}
         PkgConfig::ZMQ
         Threads::Threads

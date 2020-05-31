@@ -12,7 +12,7 @@
 #include <string>
 
 
-void worker(const std::string &workerId, const std::string &distributorAddr, const std::string &managerAddr)
+void worker(const std::string &workerId, const std::string &distributorAddr)
 {
     zmq::context_t context(1);
 
@@ -23,12 +23,6 @@ void worker(const std::string &workerId, const std::string &distributorAddr, con
     //  Socket to send messages to
     zmq::socket_t sender(context, ZMQ_PUSH);
     sender.connect("tcp://localhost:5558");
-
-    // Send Ready to manager
-    zmq::socket_t workerReady(context, ZMQ_PUSH);
-    workerReady.connect(managerAddr);
-    zmq::message_t messageReady{0};
-    workerReady.send(messageReady);
 
     std::cout << "Worker " + workerId + " ready!\n" << std::flush;
     //  Process tasks forever

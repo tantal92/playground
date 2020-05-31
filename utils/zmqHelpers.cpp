@@ -1,4 +1,6 @@
-#include "utils/zmqHelpers.h"
+#include "zmqHelpers.h"
+#include <sstream>
+#include <iostream>
 
 namespace zhelpers {
 void bind_to_random_port(zmq::socket_t &socket)
@@ -19,25 +21,10 @@ std::string get_socket_port(const zmq::socket_t &sock)
     return std::string{port};
 }
 
-template <typename T>
-T receive_proto(zmq::socket_t &socket)
-{
-    zmq::message_t request;
-    socket.recv(&request);
-    T receivedMsg{};
-    receivedMsg.ParseFromArray(request.data(), request.size());
-    return receivedMsg;
-}
-
-template <typename T>
-void send_proto(zmq::socket_t &socket, const T &proto)
-{
-    auto           protoSize = proto.ByteSizeLong();
-    zmq::message_t msg(protoSize);
-    std::string    str;
-    proto.SerializeToString(&str);
-    memcpy(msg.data(), str.c_str(), protoSize);
-    socket.send(msg);
+std::string threadIdToString(std::thread::id id){
+    std::stringstream ss;
+    ss << id;
+    return ss.str();
 }
 
 } // namespace zhelpers
